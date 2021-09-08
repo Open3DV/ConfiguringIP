@@ -20,20 +20,17 @@ const char* help_info =
 1.Get camera list:\n\
 configuring_ip.exe --get-list \n\
 \n\
-1.Get address:\n\
+2.Get address:\n\
 configuring_ip.exe --get-address --mac xx:xx:xx:xx:xx:xx \n\
 \n\
-2.Get ip:\n\
+3.Get ip:\n\
 configuring_ip.exe --get-ip --mac xx:xx:xx:xx:xx:xx \n\
 \n\
-3.Get netmask:\n\
+4.Get netmask:\n\
 configuring_ip.exe --get-netmask --mac xx:xx:xx:xx:xx:xx \n\
 \n\
-4.Get gateway:\n\
+5.Get gateway:\n\
 configuring_ip.exe --get-gateway --mac xx:xx:xx:xx:xx:xx \n\
-\n\
-5.Get dns:\n\
-configuring_ip.exe --get-dns --mac xx:xx:xx:xx:xx:xx \n\
 \n\
 6.Set ip:\n\
 configuring_ip.exe --set-ip 192.168.1.100 --mac xx:xx:xx:xx:xx:xx \n\
@@ -44,8 +41,8 @@ configuring_ip.exe --set-netmask 255.255.255.0 --mac xx:xx:xx:xx:xx:xx \n\
 8.Set gateway:\n\
 configuring_ip.exe --set-gateway 192.168.1.1 --mac xx:xx:xx:xx:xx:xx \n\
 \n\
-9.Set dns:\n\
-configuring_ip.exe --set-dns 192.168.1.1 --mac xx:xx:xx:xx:xx:xx \n\
+9.Set auto:\n\
+configuring_ip.exe --set-auto --mac xx:xx:xx:xx:xx:xx \n\
 ";
 
 
@@ -54,16 +51,15 @@ extern char* optarg;
 
 enum opt_set
 {
+	SET_AUTO,
 	SET_IP,
 	SET_NETMASK,
-	SET_GATEWAY,
-	SET_DNS,
+	SET_GATEWAY, 
 	GET_LIST,
 	GET_ADDRESS,
 	GET_IP,
 	GET_NETMASK,
-	GET_GATEWAY,
-	GET_DNS,
+	GET_GATEWAY, 
 	GET_MAC,
 	MAC,
 	HELP
@@ -74,13 +70,12 @@ static struct option long_options[] =
 	{"mac",required_argument,NULL,MAC},
 	{"set-ip",required_argument,NULL,SET_IP},
 	{"set-netmask",required_argument,NULL,SET_NETMASK},
-	{"set-gateway",required_argument,NULL,SET_GATEWAY},
-	{"set-dns",required_argument,NULL,SET_DNS},
+	{"set-gateway",required_argument,NULL,SET_GATEWAY}, 
+	{"set-auto",no_argument,NULL,SET_AUTO},
 	{"get-address",no_argument,NULL,GET_ADDRESS},
 	{"get-ip", no_argument, NULL, GET_IP},
 	{"get-netmask",no_argument,NULL,GET_NETMASK},
-	{"get-gateway",no_argument,NULL,GET_GATEWAY},
-	{"get-dns",no_argument,NULL,GET_DNS},
+	{"get-gateway",no_argument,NULL,GET_GATEWAY}, 
 	{"get-list",no_argument,NULL,GET_MAC},
 	{"help",no_argument,NULL,HELP},
 };
@@ -141,11 +136,7 @@ int main(int argc, char* argv[])
 		case SET_GATEWAY:
 			gateway = optarg;
 			command = c;
-			break;
-		case SET_DNS:
-			dns = optarg;
-			command = c;
-			break;
+			break; 
 		case MAC:
 			mac = optarg; 
 			break;
@@ -208,6 +199,7 @@ int main(int argc, char* argv[])
 
 
 		break;
+
 	case GET_ADDRESS:
 	{
 		std::cout << "GET_ADDRESS......" << std::endl;
@@ -315,10 +307,10 @@ int main(int argc, char* argv[])
 	}
 
 		break;
-	case GET_DNS:
+	case SET_AUTO:
 	{
-		std::cout << "GET_DNS......" << std::endl;
-		int ret = bind_server_port(3 * 1000);
+		std::cout << "SET_AUTO......" << std::endl;
+		int ret = bind_server_port(60 * 1000);
 		if (0 != ret)
 		{
 			std::cout << "bind error" << std::endl;
@@ -326,23 +318,27 @@ int main(int argc, char* argv[])
 
 
 		char command_c[MAX_BUF_LEN] = "";
-		sprintf(command_c, "%8d", DF_CMD_GET_NETWORK_DNS);
+		sprintf(command_c, "%8d", DF_CMD_SET_NETWORK_DHCP);
 
 
+		printf("mac: %s \n", mac);
 		std::string str_data = std::string(command_c) + ";" + std::string(mac);
 		char* message_buff = const_cast<char*>(str_data.c_str());
 
-		send_server_data(message_buff);
-		 
+
+		send_server_data(message_buff); 
+
 		recv_server_data(recv_buff, recv_buff_size);
-		printf("DNS: %s \n", recv_buff);
+
+		printf("ADDRESS: %s \n", recv_buff);
+
 	}
 
-		break;
+	break;
 	case SET_IP:
 	{
 		std::cout << "SET_IP......" << std::endl;
-		int ret = bind_server_port(30 * 1000);
+		int ret = bind_server_port(32 * 1000);
 		if (0 != ret)
 		{
 			std::cout << "bind error" << std::endl;
@@ -356,9 +352,11 @@ int main(int argc, char* argv[])
 		char* message_buff = const_cast<char*>(str_data.c_str());
 
 		send_server_data(message_buff);
-		recv_server_data(recv_buff, recv_buff_size); 
 
+
+		recv_server_data(recv_buff, recv_buff_size);
 		printf("ADDRESS: %s \n", recv_buff);
+ 
 
 	}
 
@@ -407,29 +405,6 @@ int main(int argc, char* argv[])
 		printf("ADDRESS: %s \n", recv_buff);
 	}
 
-	break;
-	case SET_DNS:
-	{
-		std::cout << "SET_DNS......" << std::endl;
-		int ret = bind_server_port(30 * 1000);
-		if (0 != ret)
-		{
-			std::cout << "bind error" << std::endl;
-		}
-
-
-		char command_c[MAX_BUF_LEN] = "";
-		sprintf(command_c, "%8d", DF_CMD_SET_NETWORK_DNS);
-
-		std::string str_data = std::string(command_c) + ";" + std::string(mac) + ";" + std::string(dns);
-		char* message_buff = const_cast<char*>(str_data.c_str());
-
-		send_server_data(message_buff);
-		recv_server_data(recv_buff, recv_buff_size);
-
-
-		printf("ADDRESS: %s \n", recv_buff);
-	}
 	break;
 	default:
 		break;

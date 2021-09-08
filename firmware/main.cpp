@@ -37,24 +37,6 @@ struct sockaddr_in sin_from;
 int main(int argc, char *argv[])
 {
 
-	// std::string set_address = "192.168.88.137";
-	// std::string set_netmask = "";
-	// std::string set_gateway = "";
-	// std::string set_dns = "";
-
-	// std::cout << "Hello IP" << std::endl;
-
-	// int serial_number = 0;
-
-	// bool ok = readSerialNumber(serial_number);
-
-	// if (!ok)
-	// {
-	// 	std::cout << "read serial number error!" << std::endl;
-	// }
-
-	// std::cout << "read serial number: " << serial_number << std::endl;
-
 	int ret = 0; 
 	char mac_buff[512] = ""; 
 	ret = getLocalMacAddr(mac_buff); 
@@ -89,27 +71,17 @@ int main(int argc, char *argv[])
 		/**************************************************************************/
 		std::string data_str(buff);
 
-		// std::cout << "data_str: " << data_str << std::endl;
 
 		std::vector<std::string> param_list;
 		param_list = vStringSplit(data_str, ";");
 
 		/*************************************************************************/
-
-		// std::cout << "param_list size: " << param_list.size() << std::endl;
  
 		int command = 0; 
 		std::stringstream ss;
 		ss << param_list[0];
 		ss >> command;
 
-		// std::cout << "command: " << command << std::endl;
-
-  
-		//获取nano地址
-		// char ip_buff[512] = "";
-		// char mask_buff[512] = "";
-		// char gateway_buff[512] = "";
 
 		std::string now_address;
 		std::string now_netmask;
@@ -121,23 +93,21 @@ int main(int argc, char *argv[])
 		case DF_CMD_GET_NETWORK_MAC:
 		{
 
-			readNetworkAddress(now_address, now_netmask, now_gateway, now_dns);
 
-			// std::cout << "now_ip: " << now_address << std::endl;
-			// std::cout << "now_netmask: " << now_netmask << std::endl;
-			// std::cout << "now_gateway: " << now_gateway << std::endl;
-			// std::cout << "now_dns: " << now_dns << std::endl;
-
-			std::string message = "";
 			
+			std::string address;
+			std::string netmask;
+			std::string gateway;
+
+			bool ret = inquireNetworkAddress(address, netmask, gateway);
+			std::string message = "";
+
 			message += std::string(mac_buff);
 			message += ";";
-
 			message += " ip: ";
-			message += now_address;
+			message += address;
 			message += ";";
-
-
+ 
 			char *message_buff = const_cast<char *>(message.c_str());
 			send_data_to_client(message_buff, strlen(message_buff));
  
@@ -154,22 +124,24 @@ int main(int argc, char *argv[])
 				continue;
 			}
 
-			readNetworkAddress(now_address, now_netmask, now_gateway, now_dns);
-
-
+			/******************************************************************************/
+			std::string address;
+			std::string netmask;
+			std::string gateway;
+			bool ret = inquireNetworkAddress(address, netmask, gateway);
 
 			std::string message = "";
-			message += now_address;
+			message += address;
 			message += ";";
-			message += now_netmask;
+			message += netmask;
 			message += ";";
-			message += now_gateway;
-			message += ";";
-			message += now_dns;
+			message += gateway;
 			message += ";";
 
 			char *message_buff = const_cast<char *>(message.c_str());
 			send_data_to_client(message_buff, strlen(message_buff));
+			
+			/******************************************************************************/
 
 		}
 		break;
@@ -183,11 +155,20 @@ int main(int argc, char *argv[])
 				continue;
 			}
 
-			readNetworkAddress(now_address, now_netmask, now_gateway, now_dns);
+			/******************************************************************************/
+			std::string address;
+			std::string netmask;
+			std::string gateway;
+			bool ret = inquireNetworkAddress(address, netmask, gateway);
 
-			std::string message = now_address;
+			std::string message = "";
+			message += address;
+			message += ";";
+
 			char *message_buff = const_cast<char *>(message.c_str());
 			send_data_to_client(message_buff, strlen(message_buff));
+			
+			/******************************************************************************/
 		}
 		break;
 		case DF_CMD_GET_NETWORK_NETMASK:
@@ -199,11 +180,21 @@ int main(int argc, char *argv[])
 				continue;
 			}
 
-			readNetworkAddress(now_address, now_netmask, now_gateway, now_dns);
+						/******************************************************************************/
+			std::string address;
+			std::string netmask;
+			std::string gateway;
+			bool ret = inquireNetworkAddress(address, netmask, gateway);
 
-			std::string message = now_netmask;
+			std::string message = "";
+			message += netmask;
+			message += ";";
+
 			char *message_buff = const_cast<char *>(message.c_str());
 			send_data_to_client(message_buff, strlen(message_buff));
+			
+			/******************************************************************************/
+
 		}
 		break;
 		case DF_CMD_GET_NETWORK_GATEWAY:
@@ -215,11 +206,20 @@ int main(int argc, char *argv[])
 				continue;
 			}
 
-			readNetworkAddress(now_address, now_netmask, now_gateway, now_dns);
+			/******************************************************************************/
+			std::string address;
+			std::string netmask;
+			std::string gateway;
+			bool ret = inquireNetworkAddress(address, netmask, gateway);
 
-			std::string message = now_gateway;
+			std::string message = "";
+			message += gateway;
+			message += ";";
+
 			char *message_buff = const_cast<char *>(message.c_str());
 			send_data_to_client(message_buff, strlen(message_buff));
+			
+			/******************************************************************************/
 		}
 		break;
 		case DF_CMD_GET_NETWORK_DNS:
@@ -231,11 +231,53 @@ int main(int argc, char *argv[])
 				continue;
 			}
 	
+
+
 			readNetworkAddress(now_address, now_netmask, now_gateway, now_dns);
 
 			std::string message = now_dns;
 			char *message_buff = const_cast<char *>(message.c_str());
 			send_data_to_client(message_buff, strlen(message_buff));
+		}
+		break;
+		case DF_CMD_SET_NETWORK_DHCP:
+		{
+			if (mac_addr_ != param_list[1])
+			{
+
+				char err_buff[MAX_BUF_LEN] = "mac error"; 
+				continue;
+			}
+
+			bool flag_ret = setNetworkDhcp();
+
+			if (!flag_ret)
+			{
+				std::cout << "dhcp failure!" << std::endl;
+				char err_buff[MAX_BUF_LEN] = "set auto error";
+				send_data_to_client(err_buff, strlen(err_buff)); 
+				continue;
+			}
+
+			/******************************************************************************/
+			std::string address;
+			std::string netmask;
+			std::string gateway;
+			bool ret = inquireNetworkAddress(address, netmask, gateway);
+
+			std::string message = "";
+			message += address;
+			message += ";";
+			message += netmask;
+			message += ";";
+			message += gateway;
+			message += ";";
+
+			char *message_buff = const_cast<char *>(message.c_str());
+			send_data_to_client(message_buff, strlen(message_buff));
+			
+			/******************************************************************************/
+
 		}
 		break;
 		case DF_CMD_SET_NETWORK_IP:
@@ -253,7 +295,7 @@ int main(int argc, char *argv[])
 			std::string set_gateway = "";
 			std::string set_dns = "";
 
-			int ok = setNetworkAddress(set_address, set_netmask, set_gateway, set_dns);
+			bool ok = setNetworkStatic(set_address, set_netmask, set_gateway);
 
 			if(!ok)
 			{
@@ -265,18 +307,29 @@ int main(int argc, char *argv[])
 			}
 
 
-				std::string message = ""; 
-				message += set_address;
-				message += ";";
-				message += set_netmask;
-				message += ";";
-				message += set_gateway;
-				message += ";";
-				message += set_dns;
-				message += ";";
+			/******************************************************************************/
+			std::string address;
+			std::string netmask;
+			std::string gateway;
+			bool ret = inquireNetworkAddress(address, netmask, gateway);
 
-				char *message_buff = const_cast<char *>(message.c_str());
-				send_data_to_client(message_buff, strlen(message_buff));
+			std::string message = "";
+			message += address;
+			message += ";";
+			message += netmask;
+			message += ";";
+			message += gateway;
+			message += ";";
+
+
+			// sleep(3);
+
+			char *message_buff = const_cast<char *>(message.c_str());
+			send_data_to_client(message_buff, strlen(message_buff));
+			
+ 
+
+			/******************************************************************************/
 	 
   
 		}
@@ -296,7 +349,7 @@ int main(int argc, char *argv[])
 			std::string set_gateway = "";
 			std::string set_dns = "";
 
-			bool ok = setNetworkAddress(set_address, set_netmask, set_gateway, set_dns);
+       		bool ok = setNetworkStatic(set_address, set_netmask, set_gateway);
 
 
 			if(!ok)
@@ -315,8 +368,6 @@ int main(int argc, char *argv[])
 			message += set_netmask;
 			message += ";";
 			message += set_gateway;
-			message += ";";
-			message += set_dns;
 			message += ";";
 
 			char *message_buff = const_cast<char *>(message.c_str());
@@ -339,9 +390,7 @@ int main(int argc, char *argv[])
 			std::string set_gateway = param_list[2];
 			std::string set_dns = "";
 
-			int ok = setNetworkAddress(set_address, set_netmask, set_gateway, set_dns);
-
-
+       		bool ok = setNetworkStatic(set_address, set_netmask, set_gateway);
 
 			if(!ok)
 			{
@@ -360,8 +409,6 @@ int main(int argc, char *argv[])
 			message += set_netmask;
 			message += ";";
 			message += set_gateway;
-			message += ";";
-			message += set_dns;
 			message += ";";
 
 			char *message_buff = const_cast<char *>(message.c_str());
@@ -424,8 +471,7 @@ int main(int argc, char *argv[])
 int recv_client_data(char *buffer)
 {
 	int err = 0;
-	socklen_t nAddrLen = sizeof(struct sockaddr);
-	// char buff[MAX_BUF_LEN] = "";
+	socklen_t nAddrLen = sizeof(struct sockaddr); 
 
 	std::cout << "wait data..." << std::endl;
 	// 接收数据
@@ -598,7 +644,7 @@ int send_data_to_client(char *buffer, int buffer_size)
 		std::cout << "sendto error: error code is " << err << std::endl;
  
 	}
-	// printf("Send: %s \n", buffer);
+	printf("Send: %s \n", buffer);
  
 
 	return 0;
