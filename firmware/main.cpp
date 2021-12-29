@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
 			message += std::string(mac_buff);
 			message += ";";
-			message += " ip: ";
+			// message += " ip: ";
 			message += address;
 			message += ";";
  
