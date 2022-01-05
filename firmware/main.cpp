@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
 			message += std::string(mac_buff);
 			message += ";";
-			message += " ip: ";
+			// message += " ip: ";
 			message += address;
 			message += ";";
  
@@ -250,7 +250,6 @@ int main(int argc, char *argv[])
 			}
 
 			bool flag_ret = setNetworkDhcp();
-
 			if (!flag_ret)
 			{
 				std::cout << "dhcp failure!" << std::endl;

@@ -64,6 +64,11 @@ bool readSerialNumber(int& number)
 
 bool inquireNetworkAddress(std::string &address,std::string &netmask,std::string &gateway)
 {
+    std::string dns= "";
+    bool ret = readNetworkAddress(address,netmask,gateway,dns);
+
+    if(!ret)
+    {
     	//获取nano地址
         char ip_buff[512] = "";
         char mask_buff[512] = "";
@@ -84,6 +89,10 @@ bool inquireNetworkAddress(std::string &address,std::string &netmask,std::string
         address = std::string(ip_buff);
         netmask = std::string(mask_buff);
         gateway = std::string(gateway_buff);
+        
+    }
+
+
 
     return true;
 }
@@ -372,7 +381,9 @@ bool setNetworkStatic(std::string &set_address,std::string &set_netmask,std::str
   
     }
 
-    
+ 
+
+    //重启网卡
 	sleep(3);
 
 

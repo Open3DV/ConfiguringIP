@@ -1,3 +1,6 @@
+build
 x64
 Debug
 .vs
+configuring_network_gui
+sdk
