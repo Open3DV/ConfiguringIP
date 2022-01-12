@@ -8,6 +8,8 @@ configuring_network_gui::configuring_network_gui(QWidget *parent)
     : QDialog(parent)
 {
     ui.setupUi(this);
+
+    this->setWindowIcon(QIcon("myapp.ico"));
  
     ui.tableWidget_network_message->setColumnCount(2);
     QStringList header;
