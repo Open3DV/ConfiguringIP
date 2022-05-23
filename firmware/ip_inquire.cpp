@@ -132,7 +132,7 @@ int getBroadcastAddr(char* str)
 /*
 	The function can printf the ip addr, copy the ip addr to the parm str
 */
-int getIpAddr(char *str)
+int getIpAddr(char *str, char *name)
 {
     int fd;
     struct ifreq ifr;
@@ -146,7 +146,7 @@ int getIpAddr(char *str)
         return -1;
     }
 
-    strcpy(g_eth_name, "eth0");
+    strcpy(g_eth_name, name);
     strcpy(ifr.ifr_name, g_eth_name);
     //get the ip addr
     if (ioctl(fd, SIOCGIFADDR, &ifr) < 0)
@@ -192,7 +192,7 @@ int getGatewayAddr(char *str)
 /*
 	The function can printf the mask addr, copy the mask addr to the parm str
 */
-int getMaskAddr(char *str)
+int getMaskAddr(char *str, char *name)
 {
     int fd;
     struct ifreq ifr;
@@ -206,7 +206,7 @@ int getMaskAddr(char *str)
         return -1;
     }
 
-    strcpy(g_eth_name, "eth0");
+    strcpy(g_eth_name, name);
     strcpy(ifr.ifr_name, g_eth_name);
 	
     //get the ip addr

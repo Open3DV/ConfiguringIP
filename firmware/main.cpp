@@ -58,10 +58,9 @@ int main(int argc, char *argv[])
 	char buff[MAX_BUF_LEN] = "";
 	
 	while (1)
-	{
-  
+	{  
 		ret = recv_client_data(buff); 
-		// printf("data_str buff: %s \n", buff);
+	    //printf("data_str buff: %s \n", buff);
 
 		if (ret != 0)
 		{
@@ -71,17 +70,14 @@ int main(int argc, char *argv[])
 		/**************************************************************************/
 		std::string data_str(buff);
 
-
 		std::vector<std::string> param_list;
 		param_list = vStringSplit(data_str, ";");
-
 		/*************************************************************************/
  
 		int command = 0; 
 		std::stringstream ss;
 		ss << param_list[0];
 		ss >> command;
-
 
 		std::string now_address;
 		std::string now_netmask;

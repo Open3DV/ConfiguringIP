@@ -64,6 +64,7 @@ bool readSerialNumber(int& number)
 
 bool inquireNetworkAddress(std::string &address,std::string &netmask,std::string &gateway)
 {
+/*
     std::string dns= "";
     bool ret = readNetworkAddress(address,netmask,gateway,dns);
 
@@ -91,9 +92,35 @@ bool inquireNetworkAddress(std::string &address,std::string &netmask,std::string
         gateway = std::string(gateway_buff);
         
     }
+*/
+
+    char ip_buff[512] = "";
+    char mask_buff[512] = "";
+    char gateway_buff[512] = "";
+    if(-1 == getGatewayAddr(gateway_buff))
+    {
+        return false;
+    }
+
+    if(-1 == getMaskAddr(mask_buff, "eth0")) 
+    {
+        if (-1 == getMaskAddr(mask_buff, "eth0:avahi")) {
+            return false;
+        }
+    }
 
 
+    if(-1 == getIpAddr(ip_buff, "eth0"))
+    {
+        if (-1 == getIpAddr(ip_buff, "eth0:avahi")) {
+            return false;
+        }
+    }
 
+    address = std::string(ip_buff);
+    netmask = std::string(mask_buff);
+    gateway = std::string(gateway_buff);
+    
     return true;
 }
 

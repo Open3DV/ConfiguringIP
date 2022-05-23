@@ -47,7 +47,7 @@ int getBroadcastAddr(char* str);
 /*
 	The function can printf the ip addr, copy the ip addr to the parm str
 */
-int getIpAddr(char *str);
+int getIpAddr(char *str, char *name);
 
 /*
 	The function can printf the Gateway addr, copy the Gateway addr to the parm str
@@ -57,7 +57,7 @@ int getGatewayAddr(char *str);
 /*
 	The function can printf the mask addr, copy the mask addr to the parm str
 */
-int getMaskAddr(char *str);
+int getMaskAddr(char *str, char *name);
 
 /*
 	The function can set the Broadcast addr, the parm str is want change's broadcast addr
