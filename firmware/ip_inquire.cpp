@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string.h>
 #include "stdlib.h"
+#include "easylogging++.h"
 
 volatile int g_SendFlag;
 char g_SendBuff[1024];
@@ -142,7 +143,7 @@ int getIpAddr(char *str, char *name)
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (-1 == fd)
     {
-		perror("socket\n");
+        LOG(INFO)<<"getIpAddr, socket connect error";
         return -1;
     }
 
@@ -151,13 +152,13 @@ int getIpAddr(char *str, char *name)
     //get the ip addr
     if (ioctl(fd, SIOCGIFADDR, &ifr) < 0)
     {
-		perror("ioctl\n");
+        LOG(INFO)<<"getIpAddr, ioctl error";
         close( fd );
         return -1;
     }
     memcpy(&sin, &ifr.ifr_addr, sizeof(sin));
 	sprintf(str,"%s",inet_ntoa(sin.sin_addr));
-    printf("ip is :%s\n", str);
+    LOG(INFO) << "getIpAddr, ip is :" << str;
 	
 	close(fd);
 	return 0;
@@ -171,21 +172,28 @@ int getGatewayAddr(char *str)
 	char buf[256]; // 128 is enough for linux    
 	char iface[16];    
 	unsigned long dest_addr, gate_addr;    
-	//*p = INADDR_NONE;    
-	fp = fopen("/proc/net/route", "r");    
-	if (fp == NULL)    
-		return -1;    
-	/* Skip title line */    
-	fgets(buf, sizeof(buf), fp);    
-	while (fgets(buf, sizeof(buf), fp)) {    
-		if (sscanf(buf, "%s\t%lX\t%lX", iface,&dest_addr, &gate_addr) != 3||dest_addr != 0)    
-			continue;    
-	//*p = gate_addr;   
+	
+    //*p = INADDR_NONE;    
+	fp = fopen("/proc/net/route", "r");
+	if (fp == NULL) {
+        LOG(INFO) << "Open /proc/net/route fail!"; 
+		return -1; 
+    }
+	
+    /* Skip title line */    
+	fgets(buf, sizeof(buf), fp);
+    LOG(INFO) << "getGatewayAddr = " << buf;
+	while (fgets(buf, sizeof(buf), fp) != NULL) {
+        LOG(INFO) << "fgets = " << buf;
+
+		if ((sscanf(buf, "%s\t%lX\t%lX", iface, &dest_addr, &gate_addr) != 3) || (dest_addr != 0))    
+			continue;
 		break;    
 	}    
-	sprintf(str, "%d.%d.%d.%d", 
-		gate_addr&0x000000ff, (gate_addr>>8)&0x000000ff, (gate_addr>>16)&0x000000ff, (gate_addr>>24)&0x000000ff);
-	printf("gateway is = %s\n", str);		
+	
+    sprintf(str, "%d.%d.%d.%d", gate_addr&0x000000ff, (gate_addr>>8)&0x000000ff, (gate_addr>>16)&0x000000ff, (gate_addr>>24)&0x000000ff);
+    LOG(INFO) << "gateway is = " << str;
+	
 	fclose(fp);    
 	return 0;
 }

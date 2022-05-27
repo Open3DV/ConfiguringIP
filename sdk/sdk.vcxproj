@@ -157,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\configuring_ip\getopt.c" />
+    <ClCompile Include="..\firmware\easylogging++.cc" />
     <ClCompile Include="configuring_network.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

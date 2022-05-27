@@ -7,13 +7,12 @@
 #include "getopt.h"
 #include "protocol.h"
 #include <vector>
+#include "../sdk/configuring_network.h"
 
 #pragma comment(lib,"WS2_32.lib")
 using namespace std;
 
 /**********************************************************************************************************/
-
-
 const char* help_info =
 "Examples:\n\
 \n\
@@ -44,7 +43,6 @@ configuring_ip.exe --set-gateway 192.168.1.1 --mac xx:xx:xx:xx:xx:xx \n\
 9.Set auto:\n\
 configuring_ip.exe --set-auto --mac xx:xx:xx:xx:xx:xx \n\
 ";
-
 
 extern int optind, opterr, optopt;
 extern char* optarg;
@@ -80,21 +78,16 @@ static struct option long_options[] =
 	{"help",no_argument,NULL,HELP},
 };
 
-
 const char* camera_id;
 const char* path;
 int command = HELP;
-
-
 /**********************************************************************************************************/
-
-
 const int MAX_BUF_LEN = 255;
 
 // 创建socket
-SOCKET connect_socket;
+//SOCKET connect_socket;
 // 用来从网络上的广播地址接收数据
-SOCKADDR_IN sin_from;
+//SOCKADDR_IN sin_from;
 
 const char* message;
 const char* ip;
@@ -103,19 +96,15 @@ const char* gateway;
 const char* dns;
 const char* mac;
 
-
-
-
+/*
 int send_command(int command); 
 int send_server_data(const char* buff);
-
-
 int send_param(const char* buff); 
 
 int bind_server_port(int nNetTimeout = 30* 1000);
 int recv_server_data(char* buffer, int& buffer_size);
 int recv_server_command(int& command);
-
+*/
 
 int main(int argc, char* argv[])
 {
@@ -149,7 +138,6 @@ int main(int argc, char* argv[])
 		}
 	}
 
-
 	char recv_buff[MAX_BUF_LEN] = "";
 	int recv_buff_size = 0;
 
@@ -157,268 +145,233 @@ int main(int argc, char* argv[])
 
 	switch (command)
 	{
-	case HELP:
-		printf(help_info);
-		break;
+		case HELP:
+			printf(help_info);
+			break;
 
-	case GET_MAC:
-	{
-		std::cout << "GET_MAC......" << std::endl;
-
-
-		int ret = bind_server_port(0.1*1000);
-		if (0 != ret)
+		case GET_MAC:
 		{
-			std::cout << "bind error" << std::endl;
-		}
+			std::cout << "GET_MAC......" << std::endl;
 
-  
-		send_command(DF_CMD_GET_NETWORK_MAC);
-
-		
-
-		for (int i = 0; i < 20; i++)
-		{
-
-			char recv_buff_temp[MAX_BUF_LEN] = "";
-			int recv_buff_size_temp = 0;
-			recv_server_data(recv_buff_temp, recv_buff_size_temp);
-			 
-
-			if (recv_buff_size_temp > 0)
-			{ 
-				printf("mac: %s \n", recv_buff_temp);
-
-				std::string mac_str(recv_buff_temp);
-
-				mac_list_.push_back(mac_str);
+			int ret = bind_server_port(0.1*1000);
+			if (0 != ret)
+			{
+				std::cout << "bind error" << std::endl;
 			}
-			 
+  
+			send_command(DF_CMD_GET_NETWORK_MAC);
+
+			for (int i = 0; i < 20; i++)
+			{
+				char recv_buff_temp[MAX_BUF_LEN] = "";
+				int recv_buff_size_temp = 0;
+				recv_server_data(recv_buff_temp, recv_buff_size_temp);
+
+				if (recv_buff_size_temp > 0)
+				{ 
+					printf("mac: %s \n", recv_buff_temp);
+					std::string mac_str(recv_buff_temp);
+					mac_list_.push_back(mac_str);
+				}
+			}
 		}
-	}
-
-
 		break;
 
-	case GET_ADDRESS:
-	{
-		std::cout << "GET_ADDRESS......" << std::endl;
-
-		int ret = bind_server_port(3 * 1000);
-		if (0 != ret)
+		case GET_ADDRESS:
 		{
-			std::cout << "bind error" << std::endl;
-		} 
+			std::cout << "GET_ADDRESS......" << std::endl;
 
-		char command_c[MAX_BUF_LEN] = "";
-		sprintf(command_c, "%8d", DF_CMD_GET_NETWORK_ADDRESS);
+			int ret = bind_server_port(3 * 1000);
+			if (0 != ret)
+			{
+				std::cout << "bind error" << std::endl;
+			} 
 
+			char command_c[MAX_BUF_LEN] = "";
+			sprintf(command_c, "%8d", DF_CMD_GET_NETWORK_ADDRESS);
 
-		std::string str_data = std::string(command_c) + ";" + std::string(mac);
-		char* message_buff = const_cast<char*>(str_data.c_str());
+			std::string str_data = std::string(command_c) + ";" + std::string(mac);
+			char* message_buff = const_cast<char*>(str_data.c_str());
+			send_server_data(message_buff);
 
-		 
-
-		send_server_data(message_buff);
-		 
-		recv_server_data(recv_buff, recv_buff_size);
-
-
-		printf("ADDRESS: %s \n", recv_buff);
-
-
-	}
-
+			recv_server_data(recv_buff, recv_buff_size);
+			printf("ADDRESS: %s \n", recv_buff);
+		}
 		break;
-	case GET_IP:
-	{		
-		std::cout << "GET_IP......" << std::endl;
-		int ret = bind_server_port(3 * 1000);
-		if (0 != ret)
-		{
-			std::cout << "bind error" << std::endl;
+
+		case GET_IP:
+		{		
+			std::cout << "GET_IP......" << std::endl;
+			int ret = bind_server_port(3 * 1000);
+			if (0 != ret)
+			{
+				std::cout << "bind error" << std::endl;
+			}
+
+			char command_c[MAX_BUF_LEN] = "";
+			sprintf(command_c, "%8d", DF_CMD_GET_NETWORK_IP);
+
+			std::string str_data = std::string(command_c) + ";" + std::string(mac);
+			char* message_buff = const_cast<char*>(str_data.c_str());
+			send_server_data(message_buff);
+		 
+			recv_server_data(recv_buff, recv_buff_size);
+			printf("IP: %s \n", recv_buff);
 		}
-
-
-		char command_c[MAX_BUF_LEN] = "";
-		sprintf(command_c, "%8d", DF_CMD_GET_NETWORK_IP);
-
-
-		std::string str_data = std::string(command_c) + ";" + std::string(mac);
-		char* message_buff = const_cast<char*>(str_data.c_str());
-
-		 
-		send_server_data(message_buff);
-		 
-		recv_server_data(recv_buff, recv_buff_size);
-
-		printf("IP: %s \n", recv_buff);
-
-	}
-
 		break;
-	case GET_NETMASK:
-	{
-		std::cout << "GET_NETMASK......" << std::endl;
-		int ret = bind_server_port(3 * 1000);
-		if (0 != ret)
+
+		case GET_NETMASK:
 		{
-			std::cout << "bind error" << std::endl;
-		}
+			std::cout << "GET_NETMASK......" << std::endl;
+			int ret = bind_server_port(3 * 1000);
+			if (0 != ret)
+			{
+				std::cout << "bind error" << std::endl;
+			}
 
-		char command_c[MAX_BUF_LEN] = "";
-		sprintf(command_c, "%8d", DF_CMD_GET_NETWORK_NETMASK);
+			char command_c[MAX_BUF_LEN] = "";
+			sprintf(command_c, "%8d", DF_CMD_GET_NETWORK_NETMASK);
 
-
-		std::string str_data = std::string(command_c) + ";" + std::string(mac);
-		char* message_buff = const_cast<char*>(str_data.c_str());
+			std::string str_data = std::string(command_c) + ";" + std::string(mac);
+			char* message_buff = const_cast<char*>(str_data.c_str());
+			send_server_data(message_buff);
 		 
-		send_server_data(message_buff);
+			recv_server_data(recv_buff, recv_buff_size);
+			printf("NETMASK: %s \n", recv_buff);
+		}
+		break;
+
+		case GET_GATEWAY:
+		{
+			std::cout << "GET_GATEWAY......" << std::endl;
+			int ret = bind_server_port(3 * 1000);
+			if (0 != ret)
+			{
+				std::cout << "bind error" << std::endl;
+			}
+
+			char command_c[MAX_BUF_LEN] = "";
+			sprintf(command_c, "%8d", DF_CMD_GET_NETWORK_GATEWAY);
+
+			std::string str_data = std::string(command_c) + ";" + std::string(mac);
+			char* message_buff = const_cast<char*>(str_data.c_str());
+			send_server_data(message_buff);
 		 
-		recv_server_data(recv_buff, recv_buff_size);
-
-
-		printf("NETMASK: %s \n", recv_buff);
-	}
-
+			recv_server_data(recv_buff, recv_buff_size);
+			printf("GATEWAY: %s \n", recv_buff);
+		}
 		break;
-	case GET_GATEWAY:
-	{
-		std::cout << "GET_GATEWAY......" << std::endl;
-		int ret = bind_server_port(3 * 1000);
-		if (0 != ret)
+
+		case SET_AUTO:
 		{
-			std::cout << "bind error" << std::endl;
+			std::string ip;
+//			SetCameraIpAuto(std::string(mac), ip);
+			SetCameraNetwork(DF_CMD_SET_NETWORK_DHCP, std::string(mac), ip, 30000);
+/*
+			std::cout << "SET_AUTO......" << std::endl;
+			int ret = bind_server_port(60 * 1000);
+			if (0 != ret)
+			{
+				std::cout << "bind error" << std::endl;
+			}
+
+			char command_c[MAX_BUF_LEN] = "";
+			sprintf(command_c, "%8d", DF_CMD_SET_NETWORK_DHCP);
+
+			printf("mac: %s \n", mac);
+			std::string str_data = std::string(command_c) + ";" + std::string(mac);
+			char* message_buff = const_cast<char*>(str_data.c_str());
+			send_server_data(message_buff); 
+
+			recv_server_data(recv_buff, recv_buff_size);
+			printf("ADDRESS: %s \n", recv_buff);
+*/
 		}
-
-
-		char command_c[MAX_BUF_LEN] = "";
-		sprintf(command_c, "%8d", DF_CMD_GET_NETWORK_GATEWAY);
-
-
-		std::string str_data = std::string(command_c) + ";" + std::string(mac);
-		char* message_buff = const_cast<char*>(str_data.c_str());
-
-		send_server_data(message_buff);
-		 
-		recv_server_data(recv_buff, recv_buff_size);
-
-		printf("GATEWAY: %s \n", recv_buff);
-	}
-
 		break;
-	case SET_AUTO:
-	{
-		std::cout << "SET_AUTO......" << std::endl;
-		int ret = bind_server_port(60 * 1000);
-		if (0 != ret)
+
+		case SET_IP:
 		{
-			std::cout << "bind error" << std::endl;
+			std::string strIP = std::string(ip);
+//			SetCameraIp(std::string(mac), strIP);
+
+			SetCameraNetwork(DF_CMD_SET_NETWORK_IP, std::string(mac), strIP, 5000);
+/*
+			std::cout << "SET_IP......" << std::endl;
+			int ret = bind_server_port(32 * 1000);
+			if (0 != ret)
+			{
+				std::cout << "bind error" << std::endl;
+			}
+
+			char command_c[MAX_BUF_LEN] = "";
+			sprintf(command_c, "%8d", DF_CMD_SET_NETWORK_IP);
+
+			std::string str_data = std::string(command_c) + ";" + std::string(mac) + ";" + std::string(ip);
+			char* message_buff = const_cast<char*>(str_data.c_str());
+			send_server_data(message_buff);
+
+			recv_server_data(recv_buff, recv_buff_size);
+			printf("ADDRESS: %s \n", recv_buff);
+*/
 		}
-
-
-		char command_c[MAX_BUF_LEN] = "";
-		sprintf(command_c, "%8d", DF_CMD_SET_NETWORK_DHCP);
-
-
-		printf("mac: %s \n", mac);
-		std::string str_data = std::string(command_c) + ";" + std::string(mac);
-		char* message_buff = const_cast<char*>(str_data.c_str());
-
-
-		send_server_data(message_buff); 
-
-		recv_server_data(recv_buff, recv_buff_size);
-
-		printf("ADDRESS: %s \n", recv_buff);
-
-	}
-
-	break;
-	case SET_IP:
-	{
-		std::cout << "SET_IP......" << std::endl;
-		int ret = bind_server_port(32 * 1000);
-		if (0 != ret)
-		{
-			std::cout << "bind error" << std::endl;
-		}
-
-		char command_c[MAX_BUF_LEN] = "";
-		sprintf(command_c, "%8d", DF_CMD_SET_NETWORK_IP);
-
-
-		std::string str_data = std::string(command_c) + ";" + std::string(mac) + ";" + std::string(ip);
-		char* message_buff = const_cast<char*>(str_data.c_str());
-
-		send_server_data(message_buff);
-
-
-		recv_server_data(recv_buff, recv_buff_size);
-		printf("ADDRESS: %s \n", recv_buff);
- 
-
-	}
-
-	break;
-	case SET_NETMASK:
-	{
-		std::cout << "SET_NETMASK......" << std::endl;
-		int ret = bind_server_port(30 * 1000);
-		if (0 != ret)
-		{
-			std::cout << "bind error" << std::endl;
-		}
-
-		char command_c[MAX_BUF_LEN] = "";
-		sprintf(command_c, "%8d", DF_CMD_SET_NETWORK_NETMASK);
-
-
-		std::string str_data = std::string(command_c) + ";" + std::string(mac) + ";" + std::string(netmask);
-		char* message_buff = const_cast<char*>(str_data.c_str());
-
-		send_server_data(message_buff);
-		recv_server_data(recv_buff, recv_buff_size);
-
-		printf("ADDRESS: %s \n", recv_buff);
-	}
-
-	break;
-	case SET_GATEWAY:
-	{
-		std::cout << "SET_GATEWAY......" << std::endl;
-		int ret = bind_server_port(30 * 1000);
-		if (0 != ret)
-		{
-			std::cout << "bind error" << std::endl;
-		}
-
-		char command_c[MAX_BUF_LEN] = "";
-		sprintf(command_c, "%8d", DF_CMD_SET_NETWORK_GATEWAY);
-
-		std::string str_data = std::string(command_c) + ";" + std::string(mac) + ";" + std::string(gateway);
-		char* message_buff = const_cast<char*>(str_data.c_str());
-
-		send_server_data(message_buff);
-		recv_server_data(recv_buff, recv_buff_size);
-
-		printf("ADDRESS: %s \n", recv_buff);
-	}
-
-	break;
-	default:
 		break;
+
+		case SET_NETMASK:
+		{
+			std::string strNetmask = std::string(netmask);
+			SetCameraNetwork(DF_CMD_SET_NETWORK_NETMASK, std::string(mac), strNetmask, 5000);
+/*
+			std::cout << "SET_NETMASK......" << std::endl;
+			int ret = bind_server_port(30 * 1000);
+			if (0 != ret)
+			{
+				std::cout << "bind error" << std::endl;
+			}
+
+			char command_c[MAX_BUF_LEN] = "";
+			sprintf(command_c, "%8d", DF_CMD_SET_NETWORK_NETMASK);
+
+			std::string str_data = std::string(command_c) + ";" + std::string(mac) + ";" + std::string(netmask);
+			char* message_buff = const_cast<char*>(str_data.c_str());
+			send_server_data(message_buff);
+
+			recv_server_data(recv_buff, recv_buff_size);
+			printf("ADDRESS: %s \n", recv_buff);
+*/
+		}
+		break;
+
+		case SET_GATEWAY:
+		{
+			std::string strGateway = std::string(gateway);
+			SetCameraNetwork(DF_CMD_SET_NETWORK_GATEWAY, std::string(mac), strGateway, 5000);
+/*
+			std::cout << "SET_GATEWAY......" << std::endl;
+			int ret = bind_server_port(30 * 1000);
+			if (0 != ret)
+			{
+				std::cout << "bind error" << std::endl;
+			}
+
+			char command_c[MAX_BUF_LEN] = "";
+			sprintf(command_c, "%8d", DF_CMD_SET_NETWORK_GATEWAY);
+
+			std::string str_data = std::string(command_c) + ";" + std::string(mac) + ";" + std::string(gateway);
+			char* message_buff = const_cast<char*>(str_data.c_str());
+			send_server_data(message_buff);
+
+			recv_server_data(recv_buff, recv_buff_size);
+			printf("ADDRESS: %s \n", recv_buff);
+*/
+		}
+		break;
+
+		default:
+			break;
 	}
-
-	 
-
-
-	/*******************************************************************************/
-
 }
 
- 
-
+/*
 int send_server_data(const char* buff)
 {
 
@@ -475,7 +428,6 @@ int send_server_data(const char* buff)
 		return -1;
 	}
  
-
 	return 0;
 }
 
@@ -522,9 +474,6 @@ int send_param(const char* buff)
 
 	int nAddrLen = sizeof(SOCKADDR);
  
-
-
-	/**********************************/
 	int ret = bind_server_port();
 
 	if (0 != ret)
@@ -671,7 +620,6 @@ int bind_server_port(int nNetTimeout)
 	return 0;
 }
 
-
 int recv_server_command(int& command)
 {
 
@@ -704,7 +652,6 @@ int recv_server_command(int& command)
 	return 0;;
 }
 
-
 int recv_server_data(char* buffer, int& buffer_size)
 {
 
@@ -727,7 +674,7 @@ int recv_server_data(char* buffer, int& buffer_size)
 
 	return 0;
 }
-
+*/
 
 
 

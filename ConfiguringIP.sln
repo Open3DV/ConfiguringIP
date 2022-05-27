@@ -4,10 +4,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "configuring_ip", "configuring_ip\configuring_ip.vcxproj", "{6C3383E3-AB1F-4E40-8400-5606F9271CE4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{573B2755-0010-4914-9E04-935CACBD7385} = {573B2755-0010-4914-9E04-935CACBD7385}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdk", "sdk\sdk.vcxproj", "{573B2755-0010-4914-9E04-935CACBD7385}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "configuring_network_gui", "configuring_network_gui\configuring_network_gui.vcxproj", "{5806DF9C-8128-48A6-94E5-141DEBD36FA3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{573B2755-0010-4914-9E04-935CACBD7385} = {573B2755-0010-4914-9E04-935CACBD7385}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

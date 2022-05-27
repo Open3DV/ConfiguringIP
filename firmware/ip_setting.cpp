@@ -1,6 +1,7 @@
 #include "ip_setting.h"
 #include <iostream>
 #include <string>
+#include "easylogging++.h"
 
 std::string& StringTrim(std::string &str)
 {
@@ -34,93 +35,67 @@ std::vector<std::string> vStringSplit(const std::string &s, const std::string &d
     return elems;
 }
 
-  bool readSettingsFromFile(std::string path,IpSetting &data)
+bool readSettingsFromFile(std::string path, IpSetting &data)
+{
+  std::ifstream ifile;
+
+  ifile.open(path, std::ios::in);
+  if (!ifile)
   {
+    	LOG(INFO) << "Open Settings File Fail.";
+      return false;
+  }
 
-    std::ifstream ifile;
-    ifile.open(path, std::ios::in);
-    if (!ifile)
-    {
-        std::cerr << "Open Settings File Fail." << std::endl;
-        return false;
-    }
+  std::vector<std::string> str_list;
+  std::string line;
 
-    std::vector<std::string> str_list;
-    std::string line;
+  while (getline(ifile, line)) // line中不包括每行的换行符
+  {
+    	LOG(INFO) << line;    
+      str_list.push_back(line);
+  }
+  ifile.close();
 
-    // std::string set_address = "192.168.88.138";
-    // std::string set_netmask = "";
-    // std::string set_gateway = "";
-    // std::string set_dns = "";
-
-    std::string old_address = "";
-    std::string old_netmask = "";
-    std::string old_gateway = "";
-    std::string old_dns = "";
-
-    while (getline(ifile, line)) // line中不包括每行的换行符
-    {
-        std::cout << line << std::endl;
-        str_list.push_back(line);
-    }
+  for (int i = 0; i < str_list.size(); i++)
+  {
+      // std::cout << str_list[i] << std::endl;
+      std::vector<std::string> param_list = vStringSplit(str_list[i], ":");
  
-
-    ifile.close();
-
-    for (int i = 0; i < str_list.size(); i++)
-    {
-        // std::cout << str_list[i] << std::endl;
-
-        std::vector<std::string> param_list = vStringSplit(str_list[i], ":");
-
-        if (2 == param_list.size())
-        { 
-
-            param_list[1] = StringTrim(param_list[1]);
-
-            if ("ip" == param_list[0])
-            {
-              data.ip = param_list[1];
-            }
-            else if ("netmask" == param_list[0])
-            { 
-              data.netmask = param_list[1];
-            }
-            else if ("gateway" == param_list[0])
-            { 
-              data.gateway = param_list[1];
-            }
-            else if ("dns" == param_list[0])
-            { 
-              data.dns = param_list[1];
-            }
-        }
-    }
-
-
-    return true;
-
+      if (2 == param_list.size())
+      { 
+          param_list[1] = StringTrim(param_list[1]);
+          
+          if ("ip" == param_list[0]) {
+            data.ip = param_list[1];
+          } else if ("netmask" == param_list[0]) { 
+            data.netmask = param_list[1];
+          } else if ("gateway" == param_list[0]) { 
+            data.gateway = param_list[1];
+          } else if ("dns" == param_list[0]) { 
+            data.dns = param_list[1];
+          }
+      }
   }
 
+  return true;
+}
 
-  bool saveSettingsToFile(std::string path,IpSetting &data)
+bool saveSettingsToFile(std::string path,IpSetting &data)
+{
+  std::ofstream ofile;
+  ofile.open(path, std::ios::out);
+  if (!ofile)
   {
-
-    std::ofstream ofile;
-    ofile.open(path, std::ios::out);
-    if (!ofile)
-    {
-        std::cerr << "Open File Fail." << std::endl;
-        return false;
-    }
-  
-    ofile << "ip: " << data.ip << std::endl;
-    ofile << "netmask: " << data.netmask << std::endl;
-    ofile << "gateway: " << data.gateway << std::endl;
-    ofile << "dns: " << data.dns << std::endl;
-    ofile << "flag: " << data.flag << std::endl;
-  
-    ofile.close();
-
-    return true;
+      std::cerr << "Open File Fail." << std::endl;
+      return false;
   }
+
+  ofile << "ip: " << data.ip << std::endl;
+  ofile << "netmask: " << data.netmask << std::endl;
+  ofile << "gateway: " << data.gateway << std::endl;
+  ofile << "dns: " << data.dns << std::endl;
+  ofile << "flag: " << data.flag << std::endl;
+
+  ofile.close();
+  return true;
+}

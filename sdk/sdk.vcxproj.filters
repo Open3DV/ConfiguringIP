@@ -26,5 +26,8 @@
     <ClCompile Include="..\configuring_ip\getopt.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\firmware\easylogging++.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

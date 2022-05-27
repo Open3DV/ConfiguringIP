@@ -23,11 +23,7 @@ configuring_network_gui::configuring_network_gui(QWidget *parent)
     ui.tableWidget_network_message->setSelectionBehavior(QAbstractItemView::SelectRows); //整行选中的方式
     ui.tableWidget_network_message->setSelectionMode(QAbstractItemView::SingleSelection); //设置为可以选中多个目标
  
-
     initializeFunction();
-
-
-
 }
 
 bool configuring_network_gui::initializeFunction()
@@ -41,13 +37,8 @@ bool configuring_network_gui::initializeFunction()
 
     connect(ui.tableWidget_network_message, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(do_tableWidget_DoubleClicked(QTableWidgetItem*)));
 
-     
-
-
-
     return true;
 }
-
 
 bool configuring_network_gui::setCameraIp(QString mac, QString ip)
 {
@@ -66,23 +57,15 @@ bool configuring_network_gui::setCameraIp(QString mac, QString ip)
         }
     }
 
-
     connect(ui.tableWidget_network_message, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(do_tableWidget_DoubleClicked(QTableWidgetItem*)));
 
     return true;
 }
- 
 
 void configuring_network_gui::do_tableWidget_DoubleClicked(QTableWidgetItem* item)
 {
-     
-    
     std::string mac = ui.tableWidget_network_message->item(item->row(), 0)->text().toStdString();
     std::string ip = ui.tableWidget_network_message->item(item->row(), 1)->text().toStdString();
-
- 
-
- 
 
     int ret = SetCameraIp(mac, ip);
 
@@ -100,20 +83,13 @@ void configuring_network_gui::do_tableWidget_DoubleClicked(QTableWidgetItem* ite
         QMessageBox::information(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("设置IP出错"),
             QMessageBox::Yes, QMessageBox::Yes);
     }
-
-
-
-
 }
-
 
 void configuring_network_gui::do_tableWidget_clicked(QTableWidgetItem* item)
 { 
 
     select_mac_ = ui.tableWidget_network_message->item(item->row(), 0)->text();
     select_ip_ = ui.tableWidget_network_message->item(item->row(), 1)->text();
-     
-
 }
 
 void configuring_network_gui::do_pushButton_auto()
@@ -134,23 +110,16 @@ void configuring_network_gui::do_pushButton_auto()
         QMessageBox::information(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("设置IP出错"),
             QMessageBox::Yes, QMessageBox::Yes);
     }
-
 }
 
 void configuring_network_gui::do_pushButton_find()
 {
- 
     std::vector<std::string> mac_list;
     std::vector<std::string> ip_list;
 
-     
-
     int ret = GetCameraList( mac_list,  ip_list);
 
-
-
     ui.tableWidget_network_message->setRowCount(mac_list.size());
-
 
     disconnect(ui.tableWidget_network_message, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(do_tableWidget_DoubleClicked(QTableWidgetItem*)));
 
@@ -166,17 +135,11 @@ void configuring_network_gui::do_pushButton_find()
         item_mac->setTextAlignment(Qt::AlignHCenter | Qt::AlignCenter);
         ui.tableWidget_network_message->setItem(i, 0, item_mac);
 
-
-
         QTableWidgetItem* item_ip = new QTableWidgetItem(QString::fromStdString(ip_list[i]));
         item_ip->setTextAlignment(Qt::AlignHCenter | Qt::AlignCenter);
         ui.tableWidget_network_message->setItem(i, 1, item_ip);
- 
-
-
     }
 
     ui.tableWidget_network_message->sortItems(0); 
     connect(ui.tableWidget_network_message, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(do_tableWidget_DoubleClicked(QTableWidgetItem*)));
-
 }
